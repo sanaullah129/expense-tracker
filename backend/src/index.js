@@ -57,12 +57,12 @@ await server.start();
 app.use(
   "/graphql",
   cors({
-    origin: "http://localhost:3000/",
+    origin: "http://localhost:3000",
     credentials: true,
   }),
   express.json(),
   expressMiddleware(server, {
-    context: async (req, res) => buildContext({ req, res }),
+    context: async ({ req, res }) => buildContext({ req, res }),
   })
 );
 await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));

@@ -1,41 +1,41 @@
 import passport from "passport";
 import bcrypt from "bcryptjs";
-import { GraphQLLocalStrategy } from "graphql-passport";
 import User from "../models/user.model.js";
+import { GraphQLLocalStrategy } from "graphql-passport";
 
 export const configurePassport = async () => {
   passport.serializeUser((user, done) => {
-    console.info("Serializing User");
+    console.log("Serializing user");
+    console.log(user)
     done(null, user._id);
   });
 
   passport.deserializeUser(async (id, done) => {
-    console.info("Deserializing User");
+    console.log("Deserializing user");
     try {
-      const user = User.findById(id);
+      const user = await User.findById(id);
       done(null, user);
-    } catch (error) {
-      console.error("Error in deserializing the user: ", error);
-      done(error);
-      k;
+    } catch (err) {
+      done(err);
     }
   });
 
   passport.use(
     new GraphQLLocalStrategy(async (username, password, done) => {
       try {
-        const user = User.findOne({ username });
+        const user = await User.findOne({ username });
         if (!user) {
-          throw new Error("Invalid Username or Password");
+          throw new Error("Invalid username or password");
+        }
+        const validPassword = await bcrypt.compare(password, user.password);
+
+        if (!validPassword) {
+          throw new Error("Invalid username or password");
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          throw new Error("Invalid Username or Password");
-        }
         return done(null, user);
-      } catch (error) {
-        console.error("Error in passport.use: ", error);
+      } catch (err) {
+        return done(err);
       }
     })
   );

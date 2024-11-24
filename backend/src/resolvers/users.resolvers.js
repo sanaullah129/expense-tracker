@@ -58,7 +58,7 @@ const userResolver = {
       }
     },
 
-    logout: async (_, context) => {
+    logout: async (_, __, context) => {
       try {
         await context.logout();
         context.req.session.destroy((err) => {
@@ -66,7 +66,7 @@ const userResolver = {
             throw new Error("Failed to destroy the session");
           }
         });
-        res.clearCookie("connect.sid");
+        context.res.clearCookie("connect.sid");
         return { message: "Logged out Successfully" };
       } catch (error) {
         console.error("Logout Resolver error", error);
@@ -77,9 +77,11 @@ const userResolver = {
     },
   },
   Query: {
-    authUser: async (_, context) => {
+    authUser: async (_, __, context) => {
       try {
         const user = await context.getUser();
+        console.log("context", context.getUser())
+        console.log("user", user)
         return user;
       } catch (error) {
         console.error("Error in Auth User Query", error);
