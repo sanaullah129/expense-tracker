@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import RadioButton from "../components/RadioButton.jsx";
-import InputField from "../components/InputField.jsx";
+import RadioButton from "../components/RadioButton";
+import InputField from "../components/InputField";
 import { useMutation } from "@apollo/client";
-import { SIGN_UP } from "../graphql/mutations/user.mutation.js";
+import { SIGN_UP } from "../graphql/mutations/user.mutation";
 import toast from "react-hot-toast";
-import { GET_AUTH_USER } from "../graphql/queries/user.query.js";
 
-const SignUpPage = () => {
+const SignUp = () => {
   const [signUpData, setSignUpData] = useState({
     name: "",
     username: "",
@@ -15,9 +14,23 @@ const SignUpPage = () => {
     gender: "",
   });
 
-  const [signUp, { loading }] = useMutation(SIGN_UP, {
-    refetchQueries: [GET_AUTH_USER]
+  const [signup, { loading }] = useMutation(SIGN_UP, {
+    refetchQueries: ["GetAuthenticatedUser"],
   });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await signup({
+        variables: {
+          input: signUpData,
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error(error.message);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -32,18 +45,6 @@ const SignUpPage = () => {
         ...prevData,
         [name]: value,
       }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await signUp({
-        variables: { input: signUpData },
-      });
-    } catch (error) {
-      console.log("Sign up Handle Submit", error);
-      toast.error(error.message);
     }
   };
 
@@ -126,4 +127,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SignUp;
